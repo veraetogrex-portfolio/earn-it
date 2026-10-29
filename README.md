@@ -2,7 +2,7 @@
 
 **The Ship button runs away until you've earned it.**
 
-![Earn It preview](preview.jpg)
+![Earn It preview](preview.gif)
 
 **Live demo:** [veraetogrex-portfolio.github.io/earn-it](https://veraetogrex-portfolio.github.io/earn-it/) · **Mockup:** [full-screen version](https://veraetogrex-portfolio.github.io/earn-it/mockup/earn-it.html)
 
