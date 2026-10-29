@@ -1,0 +1,98 @@
+/* Earn It — github.com/veraetogrex-portfolio · zero dependencies */
+:root {
+  --bg: #07080c;
+  --line: rgba(255, 255, 255, .14);
+  --text: #f2f3f7;
+  --muted: #a4a7b6;
+  --dim: #7f8293;
+  --pulse: #7c6cff;
+  --pulse-btn: #6a5af9;
+  --pulse-pale: #c9c2ff;
+  --ok: #3fe0d0;
+  --err: #ff7a45;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; display: grid; place-items: center; overflow: hidden;
+  background: radial-gradient(70% 70% at 50% 50%, #0d0e15, var(--bg) 75%);
+  color: var(--text); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.ei {
+  position: relative; width: 740px; padding: 36px 44px 26px; border-radius: 24px;
+  background: linear-gradient(180deg, #12131b, #0d0e14); border: 1px solid var(--line);
+  box-shadow: 0 80px 160px -40px rgba(0, 0, 0, .9);
+}
+@media (max-width: 600px) { .ei { zoom: .5; } }
+
+.ei-kicker { margin: 0; display: flex; align-items: center; gap: 10px; font: 500 14px ui-monospace, monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); }
+.ei-kicker i { width: 8px; height: 8px; border-radius: 50%; background: var(--pulse); box-shadow: 0 0 10px var(--pulse); }
+.ei-title { margin: 18px 0 0; font-size: 46px; line-height: 1.05; letter-spacing: -.025em; }
+.ei-title em { font-style: normal; color: var(--pulse-pale); }
+.ei.is-live .ei-title, .ei.is-live .ei-title em { color: var(--ok); }
+.ei-sub { margin: 10px 0 0; font-size: 19px; color: var(--muted); }
+
+/* ── fields ──────────────────────────────────────────── */
+.ei-group { position: relative; display: block; margin-top: 24px; }
+.ei-group > span { display: block; margin-bottom: 10px; font: 500 13px ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
+.ei-field {
+  width: 100%; height: 66px; padding: 0 64px 0 22px; border-radius: 10px; outline: none;
+  background: rgba(255, 255, 255, .03); border: 1px solid var(--line); color: var(--text); font: 500 23px system-ui, sans-serif;
+  transition: border-color .2s, box-shadow .2s;
+}
+.ei-field::placeholder { color: #4a4d5c; }
+.ei-field:focus { border-color: var(--pulse); box-shadow: 0 0 0 4px rgba(124, 108, 255, .18); }
+.ei-check { position: absolute; right: 16px; bottom: 15px; width: 36px; scale: 0; opacity: 0; transition: scale .35s cubic-bezier(.34, 1.56, .64, 1), opacity .2s; }
+.ei-check circle { fill: rgba(63, 224, 208, .14); stroke: var(--ok); stroke-width: 1.5; }
+.ei-check path { fill: none; stroke: var(--ok); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.ei-group.is-done .ei-check { scale: 1; opacity: 1; }
+.ei-group.is-done .ei-field { border-color: rgba(63, 224, 208, .45); }
+.ei-group.is-err .ei-field { border-color: var(--err); box-shadow: 0 0 0 4px rgba(255, 122, 69, .16); }
+.ei-group.is-shake { animation: ei-shake .4s; }
+@keyframes ei-shake { 20% { translate: -12px; } 40% { translate: 10px; } 60% { translate: -6px; } 80% { translate: 4px; } }
+
+/* ── hint ────────────────────────────────────────────── */
+.ei-hint { margin: 22px 0 0; display: flex; align-items: center; gap: 14px; font: 500 15px ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.ei-dots { display: flex; gap: 6px; }
+.ei-dots i { width: 22px; height: 6px; border-radius: 3px; background: #22252f; transition: background .3s, box-shadow .3s; }
+.ei-dots i.is-on { background: var(--ok); box-shadow: 0 0 10px rgba(63, 224, 208, .6); }
+.ei-hint.is-ready { color: var(--pulse-pale); }
+.ei-hint.is-ok { color: var(--ok); }
+.ei-hint.is-bad { color: var(--err); }
+
+/* ── the track and the runaway button ────────────────── */
+.ei-track {
+  position: relative; height: 92px; margin-top: 14px; border-radius: 18px;
+  background: linear-gradient(180deg, #08090d, #0b0c12); border: 1px solid rgba(255, 255, 255, .08);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, .7);
+}
+.ei-ship, .ei-trail { position: absolute; left: calc(50% - 118px); top: 12px; width: 236px; height: 66px; border-radius: 14px; }
+.ei-trail { background: radial-gradient(50% 60% at 50% 50%, rgba(124, 108, 255, .35), transparent 70%); opacity: 0; pointer-events: none; }
+.ei-ship {
+  display: grid; place-items: center; overflow: hidden; border: 0; cursor: pointer; outline: none;
+  background: #1b1c26; color: var(--text); font: 600 23px system-ui, sans-serif;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .14) inset, 0 14px 30px -12px rgba(0, 0, 0, .9);
+  transition: background .35s, box-shadow .35s, color .3s;
+}
+.ei-ship > span { grid-area: 1 / 1; display: flex; align-items: center; gap: 12px; transition: opacity .2s, translate .3s; }
+.ei-ship svg { width: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ei-ship:focus-visible { box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px #a69bff; }
+.ei-ship.is-ready { background: var(--pulse-btn); box-shadow: 0 0 0 6px rgba(124, 108, 255, .16), 0 16px 44px -8px rgba(124, 108, 255, .95); }
+.ei-ship.is-shipped { background: var(--ok); color: #04231f; box-shadow: 0 0 0 6px rgba(63, 224, 208, .18), 0 16px 50px -6px rgba(63, 224, 208, .9); }
+.ei-spin { width: 30px; height: 30px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .28); border-top-color: #fff; opacity: 0; animation: ei-spin .7s linear infinite; }
+@keyframes ei-spin { to { rotate: 360deg; } }
+.ei-done { opacity: 0; translate: 0 10px; }
+.ei-done svg { width: 26px; stroke-width: 3.4; }
+.ei-ship.is-busy .ei-label, .ei-ship.is-shipped .ei-label { opacity: 0; translate: 0 -8px; }
+.ei-ship.is-busy .ei-spin { opacity: 1; }
+.ei-ship.is-shipped .ei-done { opacity: 1; translate: 0; }
+
+/* ── the payoff: light wash + confetti over the whole page ── */
+.ei-flood, .ei-confetti { position: fixed; inset: 0; pointer-events: none; }
+.ei-flood { opacity: 0; mix-blend-mode: screen; background: radial-gradient(62% 75% at var(--x, 50%) var(--y, 70%), rgba(63, 224, 208, .55), rgba(124, 108, 255, .26) 42%, rgba(124, 108, 255, .06) 70%, transparent 90%); }
+.ei-ring { position: fixed; left: var(--x); top: var(--y); width: 200px; height: 200px; margin: -100px; border-radius: 50%; pointer-events: none; opacity: 0;
+  border: 3px solid rgba(63, 224, 208, .9); box-shadow: 0 0 40px rgba(63, 224, 208, .6), inset 0 0 40px rgba(63, 224, 208, .35); }
+.ei-confetti i { position: absolute; left: 0; top: 0; border-radius: 2px; will-change: transform, opacity; }
+
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .15s !important; } }

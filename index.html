@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Earn It — veraetogrex_portfolio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Earn It · zero dependencies · github.com/veraetogrex-portfolio -->
+  <section class="ei" id="release" role="dialog" aria-labelledby="ei-title">
+    <p class="ei-kicker"><i></i>Orbit · Release</p>
+    <h1 class="ei-title" id="ei-title">Ready to ship <em>v1.0</em>?</h1>
+    <p class="ei-sub">Two quick things and it goes live for 2,418 people.</p>
+
+    <label class="ei-group">
+      <span>Release name</span>
+      <input class="ei-field" placeholder="e.g. v1.0 — Aurora" autocomplete="off" spellcheck="false">
+      <svg class="ei-check" viewBox="0 0 36 36"><circle cx="18" cy="18" r="17"/><path d="M12 18.5l4 3.8 8.5-8.6"/></svg>
+    </label>
+    <label class="ei-group">
+      <span>Changelog</span>
+      <input class="ei-field" placeholder="What's new in one line" autocomplete="off" spellcheck="false">
+      <svg class="ei-check" viewBox="0 0 36 36"><circle cx="18" cy="18" r="17"/><path d="M12 18.5l4 3.8 8.5-8.6"/></svg>
+    </label>
+
+    <p class="ei-hint" role="status"><span class="ei-dots"><i></i><i></i></span><span class="ei-hint-text">2 fields to go</span></p>
+
+    <div class="ei-track">
+      <span class="ei-trail" aria-hidden="true"></span>
+      <button class="ei-ship" type="button">
+        <span class="ei-label"><b>Ship</b><svg viewBox="0 0 22 22"><path d="M4 11h13M12 5.5L17.5 11 12 16.5"/></svg></span>
+        <span class="ei-spin" aria-hidden="true"></span>
+        <span class="ei-done"><svg viewBox="0 0 26 26"><path d="M6 13.5l4.6 4.5L20 8"/></svg>Shipped</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="ei-flood" aria-hidden="true"></div>
+  <div class="ei-ring" aria-hidden="true"></div>
+  <div class="ei-confetti" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

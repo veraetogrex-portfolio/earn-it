@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>T07 Earn It — the Ship button runs away until the form is filled</title>
+<link rel="stylesheet" href="_shared/nocturne.css">
+<style>
+  #stage{background:var(--void)}
+  /* ---------- dimmed workspace behind the modal ---------- */
+  .ws{position:absolute;inset:0;z-index:0;filter:blur(2.5px) saturate(.8);opacity:.9}
+  .ws .top{position:absolute;left:0;right:0;top:0;height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:22px;padding:0 28px;background:#0B0C11}
+  .ws .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--pulse),#4B3FD8)}
+  .ws .tab{font:500 15px var(--f-text);color:var(--text-2)}
+  .ws .tab.on{color:var(--text)}
+  .ws .side{position:absolute;left:0;top:64px;bottom:0;width:250px;border-right:1px solid var(--line);padding:26px 18px;background:#0A0B10}
+  .ws .side .it{height:44px;border-radius:10px;display:flex;align-items:center;gap:12px;padding:0 12px;font:500 16px var(--f-text);color:var(--text-2)}
+  .ws .side .it.on{background:var(--raise);color:var(--text)}
+  .ws .side .tag{width:34px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font:500 11px var(--f-mono);background:var(--raise-2);color:var(--text-2)}
+  .ws .main{position:absolute;left:250px;right:0;top:64px;bottom:0;padding:34px 40px}
+  .ws h2{margin:0;font:600 30px var(--f-text);letter-spacing:-.01em}
+  .ws .cols{display:flex;gap:22px;margin-top:28px}
+  .ws .col{flex:1;display:flex;flex-direction:column;gap:14px}
+  .ws .colh{font:500 12px var(--f-mono);letter-spacing:.14em;color:var(--text-3);text-transform:uppercase}
+  .ws .tk{height:118px;border-radius:14px;background:var(--panel);border:1px solid var(--line);padding:18px}
+  .ws .tk b{display:block;font:500 16px var(--f-text);color:var(--text)}
+  .ws .tk i{display:block;margin-top:12px;height:8px;border-radius:4px;background:var(--raise-2);width:70%}
+  .ws .tk i+i{width:45%}
+  .dim{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(6,7,11,.70),rgba(4,5,8,.90))}
+
+  /* ---------- modal ---------- */
+  .modal{position:absolute;left:350px;top:160px;width:740px;height:580px;z-index:3;border-radius:24px;
+    background:linear-gradient(180deg,#12131B 0%,#0D0E14 100%);border:1px solid var(--line-2);
+    box-shadow:0 80px 160px -40px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.03) inset,0 1px 0 rgba(255,255,255,.06) inset;transition:opacity .35s}
+  .modal .hud-corners{inset:-12px}
+  .mtop{position:absolute;left:44px;right:44px;top:36px;display:flex;justify-content:space-between;align-items:center}
+  .kicker{font:500 14px var(--f-mono);letter-spacing:.18em;color:var(--text-3);text-transform:uppercase;display:flex;align-items:center;gap:10px}
+  .kicker .pip{width:8px;height:8px;border-radius:50%;background:var(--pulse);box-shadow:0 0 10px var(--pulse)}
+  .close{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text-3)}
+  .mtitle{position:absolute;left:44px;top:78px;font:600 46px/1.05 var(--f-text);letter-spacing:-.025em}
+  .mtitle{transition:opacity .2s,transform .3s var(--ease-out)}
+  .mtitle.out{opacity:0;transform:translateY(-8px)}
+  .mtitle.live{color:var(--ion)}
+  .mtitle.live em{color:var(--ion)}
+  .mtitle em{font-style:normal;font-family:var(--f-display);font-weight:600;letter-spacing:.01em;color:var(--pulse-pale)}
+  .msub{position:absolute;left:44px;top:138px;font:400 19px var(--f-text);color:var(--text-2)}
+
+  .grp{position:absolute;left:44px;right:44px}
+  .grp label{display:block;font:500 13px var(--f-mono);letter-spacing:.16em;color:var(--text-3);text-transform:uppercase;margin-bottom:10px}
+  .grp .wrap{position:relative}
+  .grp .field{width:100%;height:66px;font:500 23px var(--f-text);padding:0 64px 0 22px;background:rgba(255,255,255,.03)}
+  .grp .field::placeholder{color:#4A4D5C}
+  .grp .chk{position:absolute;right:16px;top:15px;width:36px;height:36px;border-radius:50%;background:rgba(63,224,208,.14);border:1.5px solid var(--ion);
+    display:flex;align-items:center;justify-content:center;transform:scale(0);opacity:0;transition:transform .35s var(--ease-back),opacity .2s}
+  .grp .chk svg path{stroke:var(--ion);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .grp.done .chk{transform:scale(1);opacity:1}
+  .grp.done .field{border-color:rgba(63,224,208,.45)}
+  .grp.done .field:focus{box-shadow:0 0 0 4px rgba(63,224,208,.14)}
+  .grp.err .field{border-color:var(--flare);box-shadow:0 0 0 4px rgba(255,122,69,.16)}
+  .grp.shake .wrap{animation:shake .4s}
+  @keyframes shake{20%{transform:translateX(-12px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+  #g1{top:196px}#g2{top:310px}
+
+  .hint{position:absolute;left:44px;right:44px;top:424px;display:flex;align-items:center;gap:14px;font:500 15px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-2);transition:color .3s}
+  .hint .dots{display:flex;gap:6px}
+  .hint .dots i{width:22px;height:6px;border-radius:3px;background:var(--raise-2);transition:background .3s,box-shadow .3s}
+  .hint .dots i.on{background:var(--ion);box-shadow:0 0 10px rgba(63,224,208,.6)}
+  .hint.ready{color:var(--pulse-pale)}
+  .hint.ok{color:var(--ion)}
+  .hint.bad{color:var(--flare)}
+  #hintText{transition:opacity .18s}
+
+  /* track */
+  .track{position:absolute;left:44px;right:44px;top:462px;height:92px;border-radius:18px;
+    background:linear-gradient(180deg,#08090D,#0B0C12);border:1px solid var(--line);box-shadow:inset 0 2px 10px rgba(0,0,0,.7)}
+  .track .ticks{position:absolute;left:20px;right:20px;top:50%;height:10px;margin-top:-5px;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.10) 0 1px,transparent 1px 24px);opacity:.8;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .track .end{position:absolute;top:50%;margin-top:-9px;font:500 13px var(--f-mono);color:#3A3D4A}
+  .track .end.l{left:16px}.track .end.r{right:16px}
+  .ghost{position:absolute;left:50%;top:12px;width:236px;height:66px;margin-left:-118px;border-radius:14px;border:1px dashed rgba(255,255,255,.10);pointer-events:none;transition:opacity .3s}
+  .ship{position:absolute;left:50%;top:12px;width:236px;height:66px;margin-left:-118px;border-radius:14px;will-change:transform;
+    background:#1B1C26;color:var(--text);font:600 23px var(--f-text);letter-spacing:-.01em;display:flex;align-items:center;justify-content:center;gap:12px;
+    box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 14px 30px -12px rgba(0,0,0,.9);transition:background .35s,box-shadow .35s,color .3s;outline:none;overflow:hidden}
+  .ship .lbl{display:flex;align-items:center;gap:12px;transition:opacity .2s,transform .25s var(--ease-out)}
+  .ship .arr{transition:transform .3s var(--ease-out)}
+  .ship.ready{background:var(--pulse-btn);box-shadow:0 0 0 1px rgba(255,255,255,.18) inset,0 0 0 6px rgba(124,108,255,.16),0 16px 44px -8px rgba(124,108,255,.95)}
+  .ship.ready .arr{transform:translateX(3px)}
+  .ship:focus-visible{box-shadow:0 0 0 1px rgba(255,255,255,.2) inset,0 0 0 3px var(--void),0 0 0 6px var(--pulse-soft)}
+  .ship.ready:focus-visible{box-shadow:0 0 0 1px rgba(255,255,255,.2) inset,0 0 0 3px var(--void),0 0 0 6px var(--pulse-soft),0 16px 44px -8px rgba(124,108,255,.95)}
+  .ship.shipped{background:var(--ion);color:#04231F;box-shadow:0 0 0 6px rgba(63,224,208,.18),0 16px 50px -6px rgba(63,224,208,.9)}
+  .ship .spin{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px;border-radius:50%;border:3px solid rgba(255,255,255,.28);border-top-color:#fff;opacity:0;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ship.busy .lbl{opacity:0;transform:translateY(-8px)}
+  .ship.busy .spin{opacity:1}
+  .ship .done{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;opacity:0;transform:translateY(10px);transition:opacity .25s,transform .35s var(--ease-back)}
+  .ship.shipped .lbl{opacity:0}
+  .ship.shipped .done{opacity:1;transform:none}
+  .ship .done svg path{stroke:#04231F;stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30;transition:stroke-dashoffset .4s .1s var(--ease-out)}
+  .ship.shipped .done svg path{stroke-dashoffset:0}
+  .trail{position:absolute;top:12px;left:50%;width:236px;height:66px;margin-left:-118px;border-radius:14px;pointer-events:none;
+    background:radial-gradient(ellipse 50% 60% at 50% 50%,rgba(124,108,255,.35),transparent 70%);opacity:0;will-change:transform,opacity}
+
+  .burst{position:absolute;left:0;top:0;width:0;height:0;z-index:5;pointer-events:none}
+  .burst i{position:absolute;left:0;top:0;display:block;will-change:transform,opacity}
+  /* payoff: light wash + shock ring over the whole frame */
+  .flood{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;mix-blend-mode:screen;
+    background:radial-gradient(ellipse 62% 75% at 720px 668px,rgba(63,224,208,.55),rgba(124,108,255,.26) 42%,rgba(124,108,255,.06) 70%,transparent 90%)}
+  .shock{position:absolute;left:720px;top:668px;width:200px;height:200px;margin:-100px;border-radius:50%;z-index:4;pointer-events:none;opacity:0;
+    border:3px solid rgba(63,224,208,.9);box-shadow:0 0 40px rgba(63,224,208,.6),inset 0 0 40px rgba(63,224,208,.35)}
+</style>
+</head>
+<body>
+<div id="stage" data-title="T07 Earn It" data-url="veraetogrex-portfolio.github.io/orb/releases">
+  <div class="ws" aria-hidden="true">
+    <div class="top"><div class="logo"></div><span class="tab on">Releases</span><span class="tab">Board</span><span class="tab">Docs</span><span class="tab">Insights</span></div>
+    <div class="side">
+      <div class="it"><span class="tag">ATL</span>Atlas</div>
+      <div class="it"><span class="tag">NWD</span>Northwind</div>
+      <div class="it"><span class="tag">HLO</span>Halo</div>
+      <div class="it on"><span class="tag">ORB</span>Orbit</div>
+    </div>
+    <div class="main">
+      <h2>Orbit · Releases</h2>
+      <div class="cols">
+        <div class="col"><div class="colh">Draft</div><div class="tk"><b>Dock polish</b><i></i><i></i></div><div class="tk"><b>Sync engine v2</b><i></i><i></i></div><div class="tk"><b>Theme tokens</b><i></i><i></i></div></div>
+        <div class="col"><div class="colh">In review</div><div class="tk"><b>Onboarding flow</b><i></i><i></i></div><div class="tk"><b>Search revamp</b><i></i><i></i></div><div class="tk"><b>Billing page</b><i></i><i></i></div></div>
+        <div class="col"><div class="colh">Ready</div><div class="tk"><b>v1.0 · Aurora</b><i></i><i></i></div><div class="tk"><b>Release notes</b><i></i><i></i></div></div>
+        <div class="col"><div class="colh">Shipped</div><div class="tk"><b>v0.9 · Beta</b><i></i><i></i></div><div class="tk"><b>v0.8 · Preview</b><i></i><i></i></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="dim"></div>
+
+  <div class="modal" id="modal" role="dialog" aria-labelledby="mt">
+    <div class="hud-corners"></div>
+    <div class="mtop"><div class="kicker"><span class="pip"></span>Orbit · Release</div>
+      <div class="close"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.6"><path d="M2 2l10 10M12 2L2 12"/></svg></div></div>
+    <div class="mtitle" id="mt">Ready to ship <em>v1.0</em>?</div>
+    <div class="msub">Two quick things and it goes live for 2,418 people.</div>
+
+    <div class="grp" id="g1"><label for="f1">Release name</label>
+      <div class="wrap"><input class="field" id="f1" placeholder="e.g. v1.0 — Aurora" autocomplete="off" spellcheck="false">
+        <div class="chk"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M4 9.5l3.2 3L14 5.5"/></svg></div></div></div>
+    <div class="grp" id="g2"><label for="f2">Changelog</label>
+      <div class="wrap"><input class="field" id="f2" placeholder="What's new in one line" autocomplete="off" spellcheck="false">
+        <div class="chk"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M4 9.5l3.2 3L14 5.5"/></svg></div></div></div>
+
+    <div class="hint" id="hint"><span class="dots"><i id="d1"></i><i id="d2"></i></span><span id="hintText">2 fields to go</span></div>
+
+    <div class="track" id="track">
+      <div class="ticks"></div><span class="end l">◂</span><span class="end r">▸</span>
+      <div class="ghost" id="ghost"></div>
+      <div class="trail" id="trail"></div>
+      <button class="ship" id="ship" type="button">
+        <span class="lbl"><span id="shipLbl">Ship</span><svg class="arr" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h13M12 5.5L17.5 11 12 16.5"/></svg></span>
+        <span class="spin"></span>
+        <span class="done"><svg width="26" height="26" viewBox="0 0 26 26"><path d="M6 13.5l4.6 4.5L20 8"/></svg>Shipped</span>
+      </button>
+    </div>
+    <div class="burst" id="burst"></div>
+  </div>
+  <div class="flood" id="flood"></div><div class="shock" id="shock"></div>
+  <div class="status-line"><span>Veraetogrex · T07</span><span>Earn it</span></div>
+</div>
+
+<script>window.AUTOPLAY = true;</script>
+<script src="_shared/stage.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const f1 = $('#f1'), f2 = $('#f2'), g1 = $('#g1'), g2 = $('#g2'), hint = $('#hint'), hintText = $('#hintText');
+const ship = $('#ship'), shipLbl = $('#shipLbl'), track = $('#track'), trail = $('#trail'), ghost = $('#ghost'), burst = $('#burst'), modal = $('#modal');
+
+// geometry (stage px): modal 350..1090, track inner width 652 → button travel ±(652-236)/2 - 12
+const TRACK_CX = 720, TRACK_CY = 160 + 462 + 46;
+const MAX = (652 - 236) / 2 - 10;
+const HALF_W = 118;
+
+// ---------- state ----------
+let bx = 0, bv = 0, target = 0;           // button offset, velocity, spring target
+let ptr = null;                            // last pointer position (stage px)
+let state = 'idle';                        // idle | busy | shipped
+let kbFocus = false;
+let flow = null;
+let lastEmpty = 2;
+
+// a field counts as filled once the user pauses typing (debounced check, like real validation)
+const filled = new Map([[f1, false], [f2, false]]);
+const empty = () => (filled.get(f1) ? 0 : 1) + (filled.get(f2) ? 0 : 1);
+const rawEmpty = () => (f1.value.trim() ? 0 : 1) + (f2.value.trim() ? 0 : 1);
+const debounce = new Map();
+function onInput(f) {
+  clearTimeout(debounce.get(f));
+  if (!f.value.trim()) { filled.set(f, false); updateForm(); return; }
+  debounce.set(f, Stage.later(() => { filled.set(f, true); updateForm(); }, 240));
+}
+const strength = () => [0, .5, 1][empty()];
+
+function updateForm() {
+  const e = empty();
+  g1.classList.toggle('done', filled.get(f1));
+  g2.classList.toggle('done', filled.get(f2));
+  if (filled.get(f1)) g1.classList.remove('err');
+  if (filled.get(f2)) g2.classList.remove('err');
+  $('#d1').classList.toggle('on', e <= 1);
+  $('#d2').classList.toggle('on', e === 0);
+  if (state !== 'idle') return;
+  const txt = e === 2 ? '2 fields to go' : e === 1 ? "1 to go — it's slowing down" : "All set — it's yours";
+  if (hintText.textContent !== txt) swapHint(txt);
+  hint.classList.remove('bad', 'ok');
+  hint.classList.toggle('ready', e === 0);
+  ship.classList.toggle('ready', e === 0);
+  shipLbl.textContent = e === 0 ? 'Ship it' : 'Ship';
+  if (e === 0) target = 0;                 // comes home when earned
+  lastEmpty = e;
+}
+function setTitle(html, live) {
+  const t = $('#mt');
+  t.classList.add('out');
+  Stage.later(() => { t.innerHTML = html; t.classList.toggle('live', live); t.classList.remove('out'); }, 200);
+}
+function swapHint(txt) {
+  hintText.style.opacity = 0;
+  Stage.later(() => { hintText.textContent = txt; hintText.style.opacity = 1; }, 160);
+}
+
+// ---------- flee logic: real pointer distance ----------
+function flee() {
+  const k = strength();
+  if (!ptr || k === 0 || state !== 'idle' || kbFocus) return;
+  const cx = TRACK_CX + bx, dx = ptr.x - cx, dy = ptr.y - TRACK_CY;
+  if (Math.abs(dy) > 120) return;
+  const R = (HALF_W + 70) * k;             // keep this horizontal gap from the pointer
+  if (Math.abs(dx) >= R) return;
+  // pointer is closing in: move away from it, or slip past it when cornered
+  let dir = dx > 0 ? -1 : 1;
+  if (Math.abs(dx) < 4) dir = ptr.x > TRACK_CX ? -1 : 1;
+  let t = ptr.x - TRACK_CX - dir * R;
+  if (Math.abs(t) > MAX) {
+    const alt = ptr.x - TRACK_CX + dir * R;
+    t = Math.abs(alt) <= MAX ? alt : Math.max(-MAX, Math.min(MAX, t));
+  }
+  target = t;
+}
+addEventListener('pointermove', e => {
+  const [x, y] = Stage.toStage(e.clientX, e.clientY);
+  ptr = { x, y };
+  kbFocus = false;
+  flee();
+});
+
+// spring loop (always running, independent of demo cancellation)
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(.032, (now - lastT) / 1000); lastT = now;
+  flee();
+  const kStiff = 300, damp = 19;
+  const a = kStiff * (target - bx) - damp * bv;
+  bv += a * dt; bx += bv * dt;
+  const tilt = Math.max(-9, Math.min(9, bv * .02));
+  const sq = 1 - Math.min(.08, Math.abs(bv) * .00012);
+  ship.style.transform = `translateX(${bx.toFixed(2)}px) rotate(${tilt.toFixed(2)}deg) scale(${(2 - sq).toFixed(3)},${sq.toFixed(3)})`;
+  trail.style.transform = `translateX(${(bx - bv * .05).toFixed(2)}px)`;
+  trail.style.opacity = Math.min(1, Math.abs(bv) / 900).toFixed(3);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ---------- input + keyboard ----------
+[f1, f2].forEach(f => f.addEventListener('input', () => onInput(f)));
+ship.addEventListener('focus', () => { if (!ship.matches(':focus-visible')) return; kbFocus = true; target = 0; });
+ship.addEventListener('blur', () => { kbFocus = false; });
+ship.addEventListener('click', () => {
+  if (state !== 'idle') return;
+  if (rawEmpty() > 0) { flow = reject(Stage.ctx()); return; }
+  filled.set(f1, true); filled.set(f2, true);
+  flow = shipIt(Stage.ctx());
+});
+f1.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f2.focus(); } });
+f2.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ship.focus(); } });
+
+async function reject(s) {
+  // the button is never disabled: keyboard (or a lucky click) still gets a clear answer
+  [[g1, f1], [g2, f2]].forEach(([g, f]) => { if (!f.value.trim()) { g.classList.add('err'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); } });
+  hint.classList.add('bad'); hint.classList.remove('ready');
+  hintText.textContent = rawEmpty() === 2 ? 'Name it and log it first' : 'One more field first';
+  await s.wait(1400);
+  hint.classList.remove('bad');
+  hintText.textContent = '';
+  updateForm();
+}
+
+async function shipIt(s) {
+  state = 'busy';
+  ship.classList.add('busy');
+  hint.classList.remove('ready'); swapHint('Deploying to production…');
+  await s.wait(560);
+  state = 'shipped';
+  ship.classList.remove('busy'); ship.classList.add('shipped');
+  hint.classList.add('ok'); swapHint(`${f1.value.trim() || 'v1.0'} is live`);
+  setTitle('<em>v1.0</em> is live.', true);
+  particles(s);
+  celebrate(s);
+  await s.tween(260, t => { ship.style.scale = String(1 + .08 * Math.sin(Math.PI * t)); }, s.ease.out);
+  ship.style.scale = '';
+}
+
+const COLORS = ['#7C6CFF', '#3FE0D0', '#FF6FB5', '#A69BFF'];
+// payoff: the burst floods the whole frame with light and a shock ring
+function celebrate(s) {
+  const fl = $('#flood'), sh = $('#shock');
+  s.tween(1200, (_, p) => { fl.style.opacity = (p < .14 ? p / .14 : (1 - p) / .86).toFixed(3); }, s.ease.linear).catch(() => {});
+  s.tween(900, (t, p) => { sh.style.opacity = (.75 * (1 - p)).toFixed(3); sh.style.transform = `scale(${(.4 + 9 * t).toFixed(3)})`; }, s.ease.out).catch(() => {});
+}
+function particles(s) {
+  burst.innerHTML = '';
+  const ox = 370 + bx, oy = 462 + 12 + 33;   // button centre in modal coords
+  const P = [];
+  for (let i = 0; i < 110; i++) {
+    const e = document.createElement('i');
+    const sz = 7 + Math.random() * 9;
+    e.style.width = e.style.height = sz + 'px';
+    e.style.background = COLORS[i % 4 === 3 ? (Math.random() * 3 | 0) : i % 4];
+    e.style.borderRadius = sz > 12 ? '3px' : '2px';
+    if (i % 5 === 0) { e.style.background = 'transparent'; e.style.border = '2px solid ' + COLORS[i % 3]; }
+    burst.appendChild(e);
+    const a = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.35;
+    const sp = 600 + Math.random() * 900;
+    P.push({ e, x: ox + (Math.random() - .5) * 160, y: oy + (Math.random() - .5) * 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: Math.random() * 360, vr: (Math.random() - .5) * 900, life: .9 + Math.random() * .5, sz });
+  }
+  let prev = 0;
+  s.tween(1400, (_, p) => {
+    const t = p * 1.4, dt = t - prev; prev = t;
+    for (const q of P) {
+      q.vy += 1400 * dt; q.vx *= (1 - 1.6 * dt); q.vy *= (1 - .9 * dt);
+      q.x += q.vx * dt; q.y += q.vy * dt; q.r += q.vr * dt;
+      const o = t < .08 ? t / .08 : Math.max(0, 1 - (t - .08) / (q.life - .08));
+      q.e.style.opacity = o.toFixed(3);
+      q.e.style.transform = `translate(${(q.x - q.sz / 2).toFixed(1)}px,${(q.y - q.sz / 2).toFixed(1)}px) rotate(${q.r.toFixed(0)}deg)`;
+    }
+  }, s.ease.linear).catch(() => {});
+}
+
+// ---------- reset ----------
+function reset() {
+  state = 'idle'; flow = null; kbFocus = false;
+  filled.set(f1, false); filled.set(f2, false);
+  f1.value = ''; f2.value = '';
+  [g1, g2].forEach(g => g.classList.remove('err', 'shake', 'done'));
+  [f1, f2].forEach(f => { f.style.color = ''; });
+  ship.classList.remove('busy', 'shipped', 'ready'); ship.style.scale = '';
+  shipLbl.textContent = 'Ship';
+  hint.classList.remove('ready', 'ok', 'bad');
+  hintText.textContent = '2 fields to go'; hintText.style.opacity = 1;
+  $('#d1').classList.remove('on'); $('#d2').classList.remove('on');
+  burst.innerHTML = '';
+  $('#flood').style.opacity = 0; $('#shock').style.opacity = 0;
+  const t = $('#mt'); t.innerHTML = 'Ready to ship <em>v1.0</em>?'; t.classList.remove('live', 'out');
+  bx = 0; bv = 0; target = 0; ptr = null;
+}
+
+// fade the shipped state back to the empty modal (end of loop)
+async function unwind(s) {
+  [f1, f2].forEach(f => f.style.transition = 'color .35s');
+  [f1, f2].forEach(f => f.style.color = 'transparent');
+  [g1, g2].forEach(g => g.classList.remove('done'));
+  $('#d1').classList.remove('on'); $('#d2').classList.remove('on');
+  ship.classList.remove('shipped', 'ready'); shipLbl.textContent = 'Ship';
+  filled.set(f1, false); filled.set(f2, false);
+  if (document.activeElement) document.activeElement.blur();
+  hint.classList.remove('ok'); swapHint('2 fields to go');
+  setTitle('Ready to ship <em>v1.0</em>?', false);
+  await s.wait(400);
+  [f1, f2].forEach(f => { f.value = ''; f.style.transition = ''; f.style.color = ''; });
+  shipLbl.textContent = 'Ship';
+  state = 'idle';
+}
+
+Stage.init({
+  reset,
+  cursorStart: [1010, 820],
+  async demo(s) {
+    // 0.0–1.2 chase: button jumps left, then slips to the right
+    await s.wait(80);
+    await s.move([860, 676], 380, { arc: .1 });
+    await s.move([640, 664], 480, { arc: -.05 });
+    // 1.2–2.0 first field
+    await s.click(f1, { ms: 260, dx: -60 });
+    await s.type(f1, 'v1.0 — Aurora', { cps: 26 });
+    // 2.0–2.8 catch again: it dodges only halfway
+    await s.move([760, 672], 360, { arc: .12 });
+    await s.move([850, 664], 340);
+    // 2.8–3.6 second field
+    await s.click(f2, { ms: 240, dx: 40 });
+    await s.type(f2, 'Faster sync, new dock', { cps: 40 });
+    // 3.6–4.1 button comes home and lights up
+    await s.move([724, 670], 400);
+    // 4.1 click → spinner → shipped + particles
+    await s.click(ship, { ms: 60 });
+    await s.wait(10);
+    await flow;
+    await s.wait(620);
+    s.move([1010, 820], 600, { arc: .1 }).catch(() => {});
+    await unwind(s);
+    await s.wait(260);
+  },
+});
+</script>
+</body>
+</html>
